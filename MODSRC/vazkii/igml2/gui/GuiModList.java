@@ -36,6 +36,8 @@ public class GuiModList extends GuiScreen implements IModGui {
 	public GuiModListContainer container;
 	private GuiTextField textField;
 
+	List<String> description = new ArrayList();
+
 	public GuiModList(ModList list) {
 		originalList = list;
 		this.list = originalList.mods;
@@ -52,6 +54,7 @@ public class GuiModList extends GuiScreen implements IModGui {
 		textField.setFocused(true);
 		textField.setCanLoseFocus(false);
 		textField.setMaxStringLength(35);
+		asignDescription();
 	}
 
 	@Override
@@ -99,7 +102,9 @@ public class GuiModList extends GuiScreen implements IModGui {
 			drawCenteredString(fontRenderer, originalList.mods.isEmpty() ? "Something went wrong..." : "Search for something else, I guess", 150, 104, 0xFFFFFF);
 		}
 
-		selected = Math.min(list.size() - 1, selected);
+		int trySelect = Math.min(list.size() - 1, selected);
+		if(trySelect != selected)
+			select(trySelect);
 
 		if(selected != -1) {
 			ModData mod = list.get(selected);
@@ -113,31 +118,8 @@ public class GuiModList extends GuiScreen implements IModGui {
 			if(vazkiiMod)
 				fontRenderer.drawStringWithShadow("(Mod by the creator of the Ingame Mod List mod!)", 317, 83, 0xFF8888);
 
-			List<String> description = new ArrayList();
-			String descString = mod.description;
-			fontRenderer.setUnicodeFlag(true);
-			int maxLenght = width - 340;
-			while(fontRenderer.getStringWidth(descString) > maxLenght) {
-				int lastSpace = 0;
-				int i = 0;
-				for(char c : descString.toCharArray()) {
-					if(c == ' ') {
-						int width = fontRenderer.getStringWidth(descString.substring(0, i));
-						if(width > maxLenght) {
-							String newString = descString.substring(0, lastSpace);
-							description.add(newString);
-							descString = descString.substring(lastSpace);
-							i -= lastSpace;
-						}
-
-						lastSpace = i;
-					}
-					i++;
-				}
-			}
-			description.add(descString);
-
 			int i1 = vazkiiMod ? 100 : 90;
+			fontRenderer.setUnicodeFlag(true);
 			for(String s : description) {
 				fontRenderer.drawStringWithShadow(s.trim(), 325, i1, 0xFFFFFF);
 				i1 += 11;
@@ -152,9 +134,42 @@ public class GuiModList extends GuiScreen implements IModGui {
 	}
 
 
-	public void select(int i, boolean doubleClick) {
-		selected = i;
-		((GuiButton) buttonList.get(1)).drawButton = true;
+	public void select(int sel) {
+		selected = sel;
+		((GuiButton) buttonList.get(1)).drawButton = sel != -1;
 	}
 
+	public void asignDescription() {
+		description.clear();
+		if(selected != -1) {
+			ModData mod = list.get(selected);
+			String descString = mod.description;
+			int maxLenght = width - 340;
+			System.out.println(descString);
+			fontRenderer.setUnicodeFlag(true);
+			while(fontRenderer.getStringWidth(descString) > maxLenght) {
+				int lastSpace = 0;
+				int i = 0;
+				for(char c : (descString + " ").toCharArray()) {
+					if(Character.isWhitespace(c)) {
+						int width = fontRenderer.getStringWidth(descString.substring(0, i));
+						System.out.println(width + " " + maxLenght);
+						if(width >= maxLenght) {
+							String newString = descString.substring(0, lastSpace);
+							System.out.println(newString);
+							description.add(newString);
+							descString = descString.substring(lastSpace);
+							i -= lastSpace;
+							break;
+						}
+
+						lastSpace = i;
+					}
+					i++;
+				}
+			}
+			fontRenderer.setUnicodeFlag(false);
+			description.add(descString);
+		}
+	}
 }
