@@ -137,6 +137,7 @@ public class GuiModList extends GuiScreen implements IModGui {
 	public void select(int sel) {
 		selected = sel;
 		((GuiButton) buttonList.get(1)).drawButton = sel != -1;
+		asignDescription();
 	}
 
 	public void asignDescription() {
@@ -145,18 +146,15 @@ public class GuiModList extends GuiScreen implements IModGui {
 			ModData mod = list.get(selected);
 			String descString = mod.description;
 			int maxLenght = width - 340;
-			System.out.println(descString);
 			fontRenderer.setUnicodeFlag(true);
-			while(fontRenderer.getStringWidth(descString) > maxLenght) {
+			while(fontRenderer.getStringWidth(descString) > maxLenght && maxLenght >= 20) {
 				int lastSpace = 0;
 				int i = 0;
 				for(char c : (descString + " ").toCharArray()) {
 					if(Character.isWhitespace(c)) {
 						int width = fontRenderer.getStringWidth(descString.substring(0, i));
-						System.out.println(width + " " + maxLenght);
 						if(width >= maxLenght) {
 							String newString = descString.substring(0, lastSpace);
-							System.out.println(newString);
 							description.add(newString);
 							descString = descString.substring(lastSpace);
 							i -= lastSpace;
